@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 public class RouteFinder implements IRouteFinder{
 
+    final Map<String, Map<String, String>> completeDestRouteUrlMap = new HashMap<>();
     private String text;
 
     public static void main(String[] args) throws Exception{
@@ -16,26 +17,18 @@ public class RouteFinder implements IRouteFinder{
         String html = rf.getUrlText(URL);
 //        System.out.println(html);
         Map<String, Map<String, String>> m = rf.getBusRoutesUrls('b');
-        for (String destination: m.keySet()) {
-            System.out.println(destination);
-            for (String str: m.get(destination).keySet()) {
-                System.out.println(str + ", " + m.get(destination).get(str));
-            }
-        }
-//        rf.getBusRoutesUrls('b');
-//        Scanner scanner = new Scanner(System.in);
-//        System.out.print("Enter the first letter of your destination: ");
-//        String dest = scanner.nextLine();
-//        char destination = dest.charAt(0);
-//        ArrayList<String> arr = rf.getPossibleDest(destination);
-//        System.out.println("Possible Destinations: ");
-//        for (String str: arr) {
-//            System.out.println(str);
+//        for (String destination: rf.completeDestRouteUrlMap.keySet()) {
+//            System.out.println(destination);
+//            for (String str: rf.completeDestRouteUrlMap.get(destination).keySet()) {
+//                System.out.println(str + ", " + rf.completeDestRouteUrlMap.get(destination).get(str));
+//            }
 //        }
+        rf.getRouteStops("https://www.communitytransit.org/busservice/schedules/route/109");
 
     }
 
     private String getUrlText(String URL) throws Exception{
+        text = "";
         URLConnection bus_sch_website = new URL(URL).openConnection();
         bus_sch_website.setRequestProperty("user-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
         BufferedReader in = new BufferedReader(new InputStreamReader(bus_sch_website.getInputStream()));
@@ -51,10 +44,11 @@ public class RouteFinder implements IRouteFinder{
     public Map<String, Map<String, String>> getBusRoutesUrls(final char destInitial) {
 
         Pattern pattern = Pattern.compile("(<h3>(.*?)</h3>.*?)?<strong><a\shref=\"(.*?)\".*?>(.*?)</a>");
-        Matcher matcher = pattern.matcher(text);
+        Matcher matcher = pattern.matcher(this.text);
 
-        final Map<String, Map<String, String>> destRouteUrlMap = new HashMap<>();
+        final Map<String, Map<String, String>> userDestRouteUrlMap = new HashMap<>();
         Map<String, String> routeUrlMap = new HashMap<>();
+        Map<String, String> routeUrlMap2 = new HashMap<>();
         String route;
         String url;
         String dest = "";
@@ -63,33 +57,33 @@ public class RouteFinder implements IRouteFinder{
                 dest = matcher.group(2);
                 if(Character.toLowerCase(dest.charAt(0)) == destInitial) {
                     routeUrlMap = new HashMap<>();
-                    destRouteUrlMap.put(dest, routeUrlMap);
-                } else {
-                    // creating a new routeUrlMap that will not be saved to destRouteUrlMap
-                    routeUrlMap = new HashMap<>();
+                    userDestRouteUrlMap.put(dest, routeUrlMap);
                 }
+                // creating a new routeUrlMap that will not be saved to destRouteUrlMap
+                routeUrlMap2 = new HashMap<>();
+                completeDestRouteUrlMap.put(dest, routeUrlMap2);
             }
             route = matcher.group(4);
-            url = matcher.group(3);
+            url = "https://www.communitytransit.org/busservice" + matcher.group(3);
             routeUrlMap.put(route, url);
+            routeUrlMap2.put(route, url);
         }
-        return destRouteUrlMap;
+        return userDestRouteUrlMap;
     }
 
-    public Map<String, LinkedHashMap<String, String>> getRouteStops(final String url) {
+    public Map<String, LinkedHashMap<String, String>> getRouteStops(final String url) throws Exception{
         Map<String, LinkedHashMap<String, String>> map = new LinkedHashMap<>();
+
+        this.getUrlText(url);
+
+        Pattern pattern = Pattern.compile("name=\"Trip\".*?>(.*?)</label>"); // <label.*? .*?checked>(.*?)</label>
+        Matcher matcher = pattern.matcher(this.text);
+
+        while(matcher.find()) {
+            String test = matcher.group(1);
+        }
+
         return map;
     }
 
-//    private ArrayList<String> getPossibleDest(char dest) {
-//        char possible_dest;
-//        ArrayList<String> destinations = new ArrayList<String>();
-//        for (String destination: destRouteUrlMap.keySet()) {
-//            possible_dest = Character.toLowerCase(destination.charAt(0));
-//            if(possible_dest == Character.toLowerCase(dest)){
-//                destinations.add(destination);
-//            }
-//        }
-//        return destinations;
-//    }
 }
