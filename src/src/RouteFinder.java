@@ -72,18 +72,18 @@ public class RouteFinder implements IRouteFinder{
     }
 
     public Map<String, LinkedHashMap<String, String>> getRouteStops(final String url) throws Exception{
-        Map<String, LinkedHashMap<String, String>> dest_trip_route = new LinkedHashMap<>();
-        LinkedHashMap<String, String> trip_route;
+
+
 
         this.getUrlText(url);
 
         Pattern label_pattern = Pattern.compile("name=\"Trip\".*?>(.*?)</label>");
         Matcher label_matcher = label_pattern.matcher(this.text);
 
+        ArrayList<String> dest_arr = new ArrayList<>();
         while(label_matcher.find()) {
             String dest = label_matcher.group(1);
-            trip_route = new LinkedHashMap<String, String>();
-            dest_trip_route.put(dest, trip_route);
+            dest_arr.add(dest);
         }
 
         Pattern trip_pattern = Pattern.compile("<th.*?<p>(.*?)</p>");
@@ -95,9 +95,33 @@ public class RouteFinder implements IRouteFinder{
             trip_arr.add(bus_stop);
         }
 
+
+//        dest_trip_route.put(dest, trip_route);
+
         trip_arr = trip_arr.subList(0, trip_arr.size() / 3);
-        for(String str: trip_arr) {
-            System.out.println(str);
+        int num_of_stops = trip_arr.size() / 2;
+        List<String> trip_1 = trip_arr.subList(0, trip_arr.size() / 2);
+        List<String> trip_2 = trip_arr.subList(trip_arr.size() / 2, trip_arr.size());
+
+        Map<String, LinkedHashMap<String, String>> dest_trip_route = new LinkedHashMap<>();
+        LinkedHashMap<String, String> trip_route;
+
+        trip_route = new LinkedHashMap<String, String>();
+        for(int bus_stop_ind = 0; bus_stop_ind < trip_1.size(); bus_stop_ind++) {
+            trip_route.put(String.valueOf(bus_stop_ind + 1), trip_1.get(bus_stop_ind));
+        }
+        dest_trip_route.put(dest_arr.get(0), trip_route);
+        trip_route = new LinkedHashMap<String, String>();
+        for(int bus_stop_ind = 0; bus_stop_ind < trip_2.size(); bus_stop_ind++) {
+            trip_route.put(String.valueOf(trip_2.size() - bus_stop_ind), trip_2.get(bus_stop_ind));
+        }
+        dest_trip_route.put(dest_arr.get(1), trip_route);
+
+        for (String dest: dest_trip_route.keySet()) {
+            System.out.println(dest);
+            for(String bus_stop: dest_trip_route.get(dest).keySet()) {
+                System.out.println(bus_stop + ": " + dest_trip_route.get(dest).get(bus_stop));
+            }
         }
 
         return dest_trip_route;
