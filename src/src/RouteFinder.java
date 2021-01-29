@@ -2,9 +2,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +22,17 @@ public class RouteFinder implements IRouteFinder{
                 System.out.println(str + ", " + m.get(destination).get(str));
             }
         }
+//        rf.getBusRoutesUrls('b');
+//        Scanner scanner = new Scanner(System.in);
+//        System.out.print("Enter the first letter of your destination: ");
+//        String dest = scanner.nextLine();
+//        char destination = dest.charAt(0);
+//        ArrayList<String> arr = rf.getPossibleDest(destination);
+//        System.out.println("Possible Destinations: ");
+//        for (String str: arr) {
+//            System.out.println(str);
+//        }
+
     }
 
     private String getUrlText(String URL) throws Exception{
@@ -41,27 +50,29 @@ public class RouteFinder implements IRouteFinder{
 
     public Map<String, Map<String, String>> getBusRoutesUrls(final char destInitial) {
 
-        Map<String, String> routeUrlMap = new HashMap<>();
-        String route;
-        String url;
-
-        Map<String, Map<String, String>> destRouteUrlMap = new HashMap<>();
-        String dest = "";
-
         Pattern pattern = Pattern.compile("(<h3>(.*?)</h3>.*?)?<strong><a\shref=\"(.*?)\".*?>(.*?)</a>");
         Matcher matcher = pattern.matcher(text);
 
+        final Map<String, Map<String, String>> destRouteUrlMap = new HashMap<>();
+        Map<String, String> routeUrlMap = new HashMap<>();
+        String route;
+        String url;
+        String dest = "";
         while(matcher.find()) {
             if(matcher.group(1) != null) {
                 dest = matcher.group(2);
-                routeUrlMap = new HashMap<>();
-                destRouteUrlMap.put(dest, routeUrlMap);
+                if(Character.toLowerCase(dest.charAt(0)) == destInitial) {
+                    routeUrlMap = new HashMap<>();
+                    destRouteUrlMap.put(dest, routeUrlMap);
+                } else {
+                    // creating a new routeUrlMap that will not be saved to destRouteUrlMap
+                    routeUrlMap = new HashMap<>();
+                }
             }
             route = matcher.group(4);
             url = matcher.group(3);
             routeUrlMap.put(route, url);
         }
-
         return destRouteUrlMap;
     }
 
@@ -69,4 +80,16 @@ public class RouteFinder implements IRouteFinder{
         Map<String, LinkedHashMap<String, String>> map = new LinkedHashMap<>();
         return map;
     }
+
+//    private ArrayList<String> getPossibleDest(char dest) {
+//        char possible_dest;
+//        ArrayList<String> destinations = new ArrayList<String>();
+//        for (String destination: destRouteUrlMap.keySet()) {
+//            possible_dest = Character.toLowerCase(destination.charAt(0));
+//            if(possible_dest == Character.toLowerCase(dest)){
+//                destinations.add(destination);
+//            }
+//        }
+//        return destinations;
+//    }
 }
