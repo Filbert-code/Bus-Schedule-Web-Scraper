@@ -5,6 +5,8 @@ import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RouteFinder implements IRouteFinder{
 
@@ -14,7 +16,8 @@ public class RouteFinder implements IRouteFinder{
         RouteFinder rf = new RouteFinder();
         String URL = "https://www.communitytransit.org/busservice/schedules/";
         String html = rf.getUrlText(URL);
-        System.out.println(html);
+//        System.out.println(html);
+        rf.getBusRoutesUrls('b');
     }
 
     private String getUrlText(String URL) throws Exception{
@@ -24,15 +27,28 @@ public class RouteFinder implements IRouteFinder{
         String inputLine = "";
         String text = "";
         while ((inputLine = in.readLine()) != null) {
-            this.text += inputLine + "\n";
+            this.text += inputLine;
         }
         in.close();
         return this.text;
     }
 
     public Map<String, Map<String, String>> getBusRoutesUrls(final char destInitial) {
-        Map<String, Map<String, String>> map = new HashMap<>();
-        return map;
+
+        Pattern pattern = Pattern.compile("(<h3>(.*?)</h3>.*?)?<strong><a\shref=\"(.*?)\".*?>(.*?)</a>");
+        Matcher matcher = pattern.matcher(text);
+
+        while(matcher.find()) {
+            System.out.println(matcher.group(0));
+
+        }
+
+        Map<String, String> routeUrlMap = new HashMap<>();
+        String route_id;
+        String url;
+
+        Map<String, Map<String, String>> destRouteUrlMap = new HashMap<>();
+        return destRouteUrlMap;
     }
 
     public Map<String, LinkedHashMap<String, String>> getRouteStops(final String url) {
