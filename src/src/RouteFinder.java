@@ -17,7 +17,13 @@ public class RouteFinder implements IRouteFinder{
         String URL = "https://www.communitytransit.org/busservice/schedules/";
         String html = rf.getUrlText(URL);
 //        System.out.println(html);
-        rf.getBusRoutesUrls('b');
+        Map<String, Map<String, String>> m = rf.getBusRoutesUrls('b');
+        for (String destination: m.keySet()) {
+            System.out.println(destination);
+            for (String str: m.get(destination).keySet()) {
+                System.out.println(str + ", " + m.get(destination).get(str));
+            }
+        }
     }
 
     private String getUrlText(String URL) throws Exception{
@@ -35,19 +41,27 @@ public class RouteFinder implements IRouteFinder{
 
     public Map<String, Map<String, String>> getBusRoutesUrls(final char destInitial) {
 
+        Map<String, String> routeUrlMap = new HashMap<>();
+        String route;
+        String url;
+
+        Map<String, Map<String, String>> destRouteUrlMap = new HashMap<>();
+        String dest = "";
+
         Pattern pattern = Pattern.compile("(<h3>(.*?)</h3>.*?)?<strong><a\shref=\"(.*?)\".*?>(.*?)</a>");
         Matcher matcher = pattern.matcher(text);
 
         while(matcher.find()) {
-            System.out.println(matcher.group(0));
-
+            if(matcher.group(1) != null) {
+                dest = matcher.group(2);
+                routeUrlMap = new HashMap<>();
+                destRouteUrlMap.put(dest, routeUrlMap);
+            }
+            route = matcher.group(4);
+            url = matcher.group(3);
+            routeUrlMap.put(route, url);
         }
 
-        Map<String, String> routeUrlMap = new HashMap<>();
-        String route_id;
-        String url;
-
-        Map<String, Map<String, String>> destRouteUrlMap = new HashMap<>();
         return destRouteUrlMap;
     }
 
