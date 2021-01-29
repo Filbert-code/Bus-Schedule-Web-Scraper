@@ -72,18 +72,35 @@ public class RouteFinder implements IRouteFinder{
     }
 
     public Map<String, LinkedHashMap<String, String>> getRouteStops(final String url) throws Exception{
-        Map<String, LinkedHashMap<String, String>> map = new LinkedHashMap<>();
+        Map<String, LinkedHashMap<String, String>> dest_trip_route = new LinkedHashMap<>();
+        LinkedHashMap<String, String> trip_route;
 
         this.getUrlText(url);
 
-        Pattern pattern = Pattern.compile("name=\"Trip\".*?>(.*?)</label>"); // <label.*? .*?checked>(.*?)</label>
-        Matcher matcher = pattern.matcher(this.text);
+        Pattern label_pattern = Pattern.compile("name=\"Trip\".*?>(.*?)</label>");
+        Matcher label_matcher = label_pattern.matcher(this.text);
 
-        while(matcher.find()) {
-            String test = matcher.group(1);
+        while(label_matcher.find()) {
+            String dest = label_matcher.group(1);
+            trip_route = new LinkedHashMap<String, String>();
+            dest_trip_route.put(dest, trip_route);
         }
 
-        return map;
+        Pattern trip_pattern = Pattern.compile("<th.*?<p>(.*?)</p>");
+        Matcher trip_matcher = trip_pattern.matcher(this.text);
+
+        List<String> trip_arr = new ArrayList<>();
+        while(trip_matcher.find()) {
+            String bus_stop = trip_matcher.group(1);
+            trip_arr.add(bus_stop);
+        }
+
+        trip_arr = trip_arr.subList(0, trip_arr.size() / 3);
+        for(String str: trip_arr) {
+            System.out.println(str);
+        }
+
+        return dest_trip_route;
     }
 
 }
