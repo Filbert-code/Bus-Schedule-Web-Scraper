@@ -16,22 +16,6 @@ public class RouteFinder implements IRouteFinder{
         text = getUrlText(url);
     }
 
-//    public static void main(String[] args) throws Exception{
-////        RouteFinder rf = new RouteFinder();
-////        String URL = "https://www.communitytransit.org/busservice/schedules/";
-////        String html = rf.getUrlText(URL);
-//////        System.out.println(html);
-////        Map<String, Map<String, String>> m = rf.getBusRoutesUrls('b');
-////        for (String destination: rf.completeDestRouteUrlMap.keySet()) {
-////            System.out.println(destination);
-////            for (String str: rf.completeDestRouteUrlMap.get(destination).keySet()) {
-////                System.out.println(str + ", " + rf.completeDestRouteUrlMap.get(destination).get(str));
-////            }
-////        }
-////        rf.getRouteStops("https://www.communitytransit.org/busservice/schedules/route/532-535");
-//
-//    }
-
     private String getUrlText(String URL) throws Exception{
         text = "";
         URLConnection bus_sch_website = new URL(URL).openConnection();
