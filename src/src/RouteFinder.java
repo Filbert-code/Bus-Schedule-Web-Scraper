@@ -8,24 +8,29 @@ import java.util.regex.Pattern;
 
 public class RouteFinder implements IRouteFinder{
 
-    final Map<String, Map<String, String>> completeDestRouteUrlMap = new HashMap<>();
+    final Map<String, Map<String, String>> completeDestRouteUrlMap;
     private String text;
 
-    public static void main(String[] args) throws Exception{
-        RouteFinder rf = new RouteFinder();
-        String URL = "https://www.communitytransit.org/busservice/schedules/";
-        String html = rf.getUrlText(URL);
-//        System.out.println(html);
-        Map<String, Map<String, String>> m = rf.getBusRoutesUrls('b');
-//        for (String destination: rf.completeDestRouteUrlMap.keySet()) {
-//            System.out.println(destination);
-//            for (String str: rf.completeDestRouteUrlMap.get(destination).keySet()) {
-//                System.out.println(str + ", " + rf.completeDestRouteUrlMap.get(destination).get(str));
-//            }
-//        }
-        rf.getRouteStops("https://www.communitytransit.org/busservice/schedules/route/532-535");
-
+    public RouteFinder(String url) throws Exception{
+        completeDestRouteUrlMap = new HashMap<>();
+        text = getUrlText(url);
     }
+
+//    public static void main(String[] args) throws Exception{
+////        RouteFinder rf = new RouteFinder();
+////        String URL = "https://www.communitytransit.org/busservice/schedules/";
+////        String html = rf.getUrlText(URL);
+//////        System.out.println(html);
+////        Map<String, Map<String, String>> m = rf.getBusRoutesUrls('b');
+////        for (String destination: rf.completeDestRouteUrlMap.keySet()) {
+////            System.out.println(destination);
+////            for (String str: rf.completeDestRouteUrlMap.get(destination).keySet()) {
+////                System.out.println(str + ", " + rf.completeDestRouteUrlMap.get(destination).get(str));
+////            }
+////        }
+////        rf.getRouteStops("https://www.communitytransit.org/busservice/schedules/route/532-535");
+//
+//    }
 
     private String getUrlText(String URL) throws Exception{
         text = "";
@@ -55,8 +60,8 @@ public class RouteFinder implements IRouteFinder{
         while(matcher.find()) {
             if(matcher.group(1) != null) {
                 dest = matcher.group(2);
+                routeUrlMap = new HashMap<>();
                 if(Character.toLowerCase(dest.charAt(0)) == destInitial) {
-                    routeUrlMap = new HashMap<>();
                     userDestRouteUrlMap.put(dest, routeUrlMap);
                 }
                 // creating a new routeUrlMap that will not be saved to destRouteUrlMap
