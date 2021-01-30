@@ -110,9 +110,8 @@ public class RouteFinder implements IRouteFinder{
             route_2_stops.add(bus_stop);
         }
 
-        Map<String, LinkedHashMap<String, String>> dest_trip_route = fill_dest_trip_route(route_1_stops,
-                                                                                          route_2_stops,
-                                                                                          dest_arr);
+        Map<String, LinkedHashMap<String, String>> dest_trip_route;
+        dest_trip_route = fill_dest_trip_route(route_1_stops, route_2_stops, dest_arr);
         return dest_trip_route;
     }
 
@@ -143,5 +142,4 @@ public class RouteFinder implements IRouteFinder{
         }
         return dest;
     }
-
 }

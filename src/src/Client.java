@@ -9,7 +9,7 @@ public class Client {
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
         while(running) {
-            System.out.print("Please enter a letter that your destinations start with ");
+            System.out.print("Please enter a letter that your destination starts with: ");
             char dest = scanner.next().toLowerCase().charAt(0);
             System.out.println();
             printBusRoutesUrls(rf, dest);
@@ -20,7 +20,14 @@ public class Client {
             String route_id = scanner.next();
             System.out.println();
 
-            String route_url = rf.getUrlFromDestRoute(route_id, dest_complete);
+            String route_url = "";
+            try {
+                route_url = rf.getUrlFromDestRoute(route_id, dest_complete);
+            } catch(Exception e) {
+                System.out.println("Could not find a bus schedule with the given destination and route combination.\n");
+                continue;
+            }
+
             printRouteStops(rf, route_url);
 
             System.out.println();
