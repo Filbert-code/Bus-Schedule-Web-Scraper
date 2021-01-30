@@ -23,7 +23,7 @@ public class RouteFinder implements IRouteFinder{
 //                System.out.println(str + ", " + rf.completeDestRouteUrlMap.get(destination).get(str));
 //            }
 //        }
-        rf.getRouteStops("https://www.communitytransit.org/busservice/schedules/route/109");
+        rf.getRouteStops("https://www.communitytransit.org/busservice/schedules/route/532-535");
 
     }
 
@@ -73,8 +73,6 @@ public class RouteFinder implements IRouteFinder{
 
     public Map<String, LinkedHashMap<String, String>> getRouteStops(final String url) throws Exception{
 
-
-
         this.getUrlText(url);
 
         Pattern label_pattern = Pattern.compile("name=\"Trip\".*?>(.*?)</label>");
@@ -83,48 +81,81 @@ public class RouteFinder implements IRouteFinder{
         ArrayList<String> dest_arr = new ArrayList<>();
         while(label_matcher.find()) {
             String dest = label_matcher.group(1);
+            dest = rid_Of_Amp(dest);
             dest_arr.add(dest);
         }
 
-        Pattern trip_pattern = Pattern.compile("<th.*?<p>(.*?)</p>");
-        Matcher trip_matcher = trip_pattern.matcher(this.text);
-
-        List<String> trip_arr = new ArrayList<>();
-        while(trip_matcher.find()) {
-            String bus_stop = trip_matcher.group(1);
-            trip_arr.add(bus_stop);
+        Pattern wd_pattern = Pattern.compile("<div id=\"Weekday(.*?)id=\"Weekday(.*?)</table>");
+        Matcher wd_matcher = wd_pattern.matcher(this.text);
+        String weekday_route_1 = "";
+        String weekday_route_2 = "";
+        while(wd_matcher.find()){
+            weekday_route_1 = wd_matcher.group(1);
+            weekday_route_2 = wd_matcher.group(2);
         }
 
+        Pattern route_pattern = Pattern.compile("<th.*?<p>(.*?)</p>");
+        Matcher route_1_matcher = route_pattern.matcher(weekday_route_1);
+        Matcher route_2_matcher = route_pattern.matcher(weekday_route_2);
 
-//        dest_trip_route.put(dest, trip_route);
-
-        trip_arr = trip_arr.subList(0, trip_arr.size() / 3);
-        int num_of_stops = trip_arr.size() / 2;
-        List<String> trip_1 = trip_arr.subList(0, trip_arr.size() / 2);
-        List<String> trip_2 = trip_arr.subList(trip_arr.size() / 2, trip_arr.size());
-
-        Map<String, LinkedHashMap<String, String>> dest_trip_route = new LinkedHashMap<>();
-        LinkedHashMap<String, String> trip_route;
-
-        trip_route = new LinkedHashMap<String, String>();
-        for(int bus_stop_ind = 0; bus_stop_ind < trip_1.size(); bus_stop_ind++) {
-            trip_route.put(String.valueOf(bus_stop_ind + 1), trip_1.get(bus_stop_ind));
+        List<String> route_1_stops = new ArrayList<>();
+        while(route_1_matcher.find()) {
+            String bus_stop = route_1_matcher.group(1);
+            if(bus_stop.contains("amp;")){
+                bus_stop = rid_Of_Amp(bus_stop);
+            }
+            route_1_stops.add(bus_stop);
         }
-        dest_trip_route.put(dest_arr.get(0), trip_route);
-        trip_route = new LinkedHashMap<String, String>();
-        for(int bus_stop_ind = 0; bus_stop_ind < trip_2.size(); bus_stop_ind++) {
-            trip_route.put(String.valueOf(trip_2.size() - bus_stop_ind), trip_2.get(bus_stop_ind));
-        }
-        dest_trip_route.put(dest_arr.get(1), trip_route);
 
+        List<String> route_2_stops = new ArrayList<>();
+        while(route_2_matcher.find()) {
+            String bus_stop = route_2_matcher.group(1);
+            if(bus_stop.contains("amp;")){
+                bus_stop = rid_Of_Amp(bus_stop);
+            }
+            route_2_stops.add(bus_stop);
+        }
+
+        Map<String, LinkedHashMap<String, String>> dest_trip_route = fill_dest_trip_route(route_1_stops,
+                                                                                          route_2_stops,
+                                                                                          dest_arr);
+        // print results
         for (String dest: dest_trip_route.keySet()) {
-            System.out.println(dest);
+            System.out.println("Destination:" + dest);
             for(String bus_stop: dest_trip_route.get(dest).keySet()) {
-                System.out.println(bus_stop + ": " + dest_trip_route.get(dest).get(bus_stop));
+                System.out.println("Stop number: " + bus_stop + " is " + dest_trip_route.get(dest).get(bus_stop));
             }
         }
 
         return dest_trip_route;
+    }
+
+    private static Map<String, LinkedHashMap<String, String>> fill_dest_trip_route(
+            List<String> route_1_stops,
+            List<String> route_2_stops,
+            ArrayList<String> dest_arr) {
+        // appending bus stop data to the LinkedHashMaps
+        Map<String, LinkedHashMap<String, String>> dest_trip_route = new LinkedHashMap<>();
+        LinkedHashMap<String, String> trip_route;
+        trip_route = new LinkedHashMap<String, String>();
+        for(int bus_stop_ind = 0; bus_stop_ind < route_1_stops.size(); bus_stop_ind++) {
+            trip_route.put(String.valueOf(bus_stop_ind + 1), route_1_stops.get(bus_stop_ind));
+        }
+        dest_trip_route.put(dest_arr.get(0), trip_route);
+        trip_route = new LinkedHashMap<String, String>();
+        for(int bus_stop_ind = 0; bus_stop_ind < route_2_stops.size(); bus_stop_ind++) {
+            trip_route.put(String.valueOf(route_2_stops.size() - bus_stop_ind), route_2_stops.get(bus_stop_ind));
+        }
+        dest_trip_route.put(dest_arr.get(1), trip_route);
+        return dest_trip_route;
+    }
+
+    private static String rid_Of_Amp(String dest) {
+        if(dest.contains("amp;")) {
+            int amp_ind = dest.indexOf("amp;");
+            dest = dest.substring(0, amp_ind) + dest.substring(amp_ind+4);
+        }
+        return dest;
     }
 
 }
