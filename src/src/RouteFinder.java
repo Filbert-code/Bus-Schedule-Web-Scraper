@@ -61,7 +61,8 @@ public class RouteFinder implements IRouteFinder{
     }
 
     public String getUrlFromDestRoute(String route_id, String dest) {
-
+        dest = dest.substring(0, 1).toUpperCase() + dest.substring(1);
+        return completeDestRouteUrlMap.get(dest).get(route_id);
     }
 
     public Map<String, LinkedHashMap<String, String>> getRouteStops(final String url) throws Exception{
