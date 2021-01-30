@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 public class RouteFinder implements IRouteFinder{
 
-    final Map<String, Map<String, String>> completeDestRouteUrlMap;
+    private final Map<String, Map<String, String>> completeDestRouteUrlMap;
     private String text;
 
     public RouteFinder(String url) throws Exception{
@@ -58,6 +58,10 @@ public class RouteFinder implements IRouteFinder{
             routeUrlMap2.put(route, url);
         }
         return userDestRouteUrlMap;
+    }
+
+    public String getUrlFromDestRoute(String route_id, String dest) {
+
     }
 
     public Map<String, LinkedHashMap<String, String>> getRouteStops(final String url) throws Exception{

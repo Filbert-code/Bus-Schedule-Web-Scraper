@@ -1,8 +1,5 @@
-import com.sun.source.tree.Tree;
-
 import java.util.Map;
 import java.util.Scanner;
-import java.util.TreeMap;
 
 public class RouteFinderClient {
     public static void main(String[] args) throws Exception{
@@ -13,6 +10,14 @@ public class RouteFinderClient {
         char dest = scanner.next().toLowerCase().charAt(0);
         System.out.println();
         printBusRoutesUrls(rf, dest);
+
+        System.out.print("Please enter your destination: ");
+        String dest_complete = scanner.next();
+        System.out.print("Please enter your route ID: ");
+        String route_id = scanner.next();
+
+        String route_url = rf.getUrlFromDestRoute(route_id, dest_complete);
+        printRouteStops(rf, route_url);
     }
 
     public static void printBusRoutesUrls(RouteFinder rf, char dest) {
@@ -24,5 +29,9 @@ public class RouteFinderClient {
             }
             System.out.println("+++++++++++++++++++++++++++++++++++");
         }
+    }
+
+    public static void printRouteStops(RouteFinder rf, String url) {
+
     }
 }
