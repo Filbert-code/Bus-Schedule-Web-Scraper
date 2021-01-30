@@ -113,14 +113,6 @@ public class RouteFinder implements IRouteFinder{
         Map<String, LinkedHashMap<String, String>> dest_trip_route = fill_dest_trip_route(route_1_stops,
                                                                                           route_2_stops,
                                                                                           dest_arr);
-        // print results
-        for (String dest: dest_trip_route.keySet()) {
-            System.out.println("Destination:" + dest);
-            for(String bus_stop: dest_trip_route.get(dest).keySet()) {
-                System.out.println("Stop number: " + bus_stop + " is " + dest_trip_route.get(dest).get(bus_stop));
-            }
-        }
-
         return dest_trip_route;
     }
 
