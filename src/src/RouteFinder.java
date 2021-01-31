@@ -1,3 +1,7 @@
+/*
+    Author: Alex Filbert
+ */
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -6,16 +10,31 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/*
+    Class for retrieving html from https://www.communitytransit.org/busservice/schedules/ and returning
+    bus route information in the greater-Seattle area. getUrlText returns the html as a String.
+    getBusRoutesUrls returns a Map with bus route information and urls based on user input. getRouteStops
+    returns the specific bus stops in the given route url.
+ */
 public class RouteFinder implements IRouteFinder{
 
+    // stores the destination, and corresponding Map of routes with route URLs. <destination, Map<route, url>>
     private final Map<String, Map<String, String>> completeDestRouteUrlMap;
+    // the html of the webpage being parsed (returned by getUrlText)
     private String text;
 
-    public RouteFinder(String url) throws Exception{
-        completeDestRouteUrlMap = new HashMap<>();
-        text = getUrlText(url);
+    // constructor
+    public RouteFinder() throws Exception{
+        completeDestRouteUrlMap = new HashMap<>(); // initialize Map
+        text = getUrlText(TRANSIT_WEB_URL); // gets html from Community Transit website
     }
 
+    /**
+     * The function returns the HTML of the webpage from the given URL
+     * @param String This represents a webpage URL
+     * @return String HTML of the webpage from the given URL
+     * @throws Exception
+     */
     private String getUrlText(String URL) throws Exception{
         text = "";
         URLConnection bus_sch_website = new URL(URL).openConnection();
@@ -30,6 +49,13 @@ public class RouteFinder implements IRouteFinder{
         return this.text;
     }
 
+    /**
+     * The function returns the route URLs for a specific destination initial using the URL text
+     * @param destInitial This represents a destination (e.g. b/B is initial for Bellevue, Bothell, ...)
+     * @return key/value map of the routes with key is destination and
+     *       value is an inner map with a pair of route ID and the route page URL
+     *       (e.g. of a map element <Brier, <111, https://www.communitytransit.org/busservice/schedules/route/111>>)
+     */
     public Map<String, Map<String, String>> getBusRoutesUrls(final char destInitial) {
 
         Pattern pattern = Pattern.compile("(<h3>(.*?)</h3>.*?)?<strong><a\shref=\"(.*?)\".*?>(.*?)</a>");
@@ -60,11 +86,25 @@ public class RouteFinder implements IRouteFinder{
         return userDestRouteUrlMap;
     }
 
+    /**
+     * The function returns a route URL that corresponds to the given route and destination
+     * @param route_id Represents the route number
+     * @param dest Represents the destination (A city inside of the greater-Seattle area)
+     * @return Route URL that goes to the bus route page with more information about the route
+     */
     public String getUrlFromDestRoute(String route_id, String dest) {
+        // capitalize the destination
         dest = dest.substring(0, 1).toUpperCase() + dest.substring(1);
         return completeDestRouteUrlMap.get(dest).get(route_id);
     }
 
+    /**
+     * The function returns route stops, grouped by destination To/From, for a certain route ID url
+     * @param url: the URL of the route that you want to get its bus stops
+     * @return map of the stops grouped by destination with key is the destination (e.g. To Bellevue)
+     *  and value is the list of stops in the same order that it was parsed on
+     * (e.g. of a map element <To Mountlake Terrace, <<1, Brier Rd &amp; 228th Pl SW>, <2, 228th St SW &amp; 48th Ave W>, ...>>)
+     */
     public Map<String, LinkedHashMap<String, String>> getRouteStops(final String url) throws Exception{
 
         this.getUrlText(url);
@@ -115,10 +155,19 @@ public class RouteFinder implements IRouteFinder{
         return dest_trip_route;
     }
 
+    /**
+     * The function is a helper method for getRouteStops. Appends all the bus stops to each of the two
+     * bus routes for the destination to a Map.
+     * @param route_1_stops List of Strings for the bus stops of the first route
+     * @param route_2_stops List of Strings for the bus stops of the second route
+     * @param dest_arr ArrayList of Strings for all the destinations
+     * @return Map<String, LinkedHashMap<String, String>> Map where the key is the bus destination
+     *         and the value is a LinkedHashMap of enumerated bus stops to get to the destination
+     */
     private static Map<String, LinkedHashMap<String, String>> fill_dest_trip_route(
-            List<String> route_1_stops,
-            List<String> route_2_stops,
-            ArrayList<String> dest_arr) {
+                                                                    List<String> route_1_stops,
+                                                                    List<String> route_2_stops,
+                                                                    ArrayList<String> dest_arr) {
         // appending bus stop data to the LinkedHashMaps
         Map<String, LinkedHashMap<String, String>> dest_trip_route = new LinkedHashMap<>();
         LinkedHashMap<String, String> trip_route;
@@ -135,6 +184,13 @@ public class RouteFinder implements IRouteFinder{
         return dest_trip_route;
     }
 
+    /**
+     * The function is a helper method for getRouteStops. Some Destination and route names that are
+     * taken from the HTML have redundant characters ("amp;") inside the Strings. This function removes
+     * those characters.
+     * @param dest Destination of the bus route or bus stop
+     * @return String destination without the characters ("amp;") inside it
+     */
     private static String rid_Of_Amp(String dest) {
         if(dest.contains("amp;")) {
             int amp_ind = dest.indexOf("amp;");
