@@ -56,7 +56,12 @@ public class RouteFinder implements IRouteFinder{
      *       value is an inner map with a pair of route ID and the route page URL
      *       (e.g. of a map element <Brier, <111, https://www.communitytransit.org/busservice/schedules/route/111>>)
      */
-    public Map<String, Map<String, String>> getBusRoutesUrls(final char destInitial) {
+    public Map<String, Map<String, String>> getBusRoutesUrls(final char destInitial) throws RuntimeException{
+
+        if(!Character.isLetter(destInitial)) {
+            System.out.println("A letter was not entered.");
+            throw new RuntimeException();
+        }
 
         Pattern pattern = Pattern.compile("(<h3>(.*?)</h3>.*?)?<strong><a\shref=\"(.*?)\".*?>(.*?)</a>");
         Matcher matcher = pattern.matcher(this.text);
@@ -71,7 +76,7 @@ public class RouteFinder implements IRouteFinder{
             if(matcher.group(1) != null) {
                 dest = matcher.group(2);
                 routeUrlMap = new HashMap<>();
-                if(Character.toLowerCase(dest.charAt(0)) == destInitial) {
+                if(Character.toLowerCase(dest.charAt(0)) == Character.toLowerCase(destInitial)) {
                     userDestRouteUrlMap.put(dest, routeUrlMap);
                 }
                 // creating a new routeUrlMap that will not be saved to destRouteUrlMap
@@ -84,18 +89,6 @@ public class RouteFinder implements IRouteFinder{
             routeUrlMap2.put(route, url);
         }
         return userDestRouteUrlMap;
-    }
-
-    /**
-     * The function returns a route URL that corresponds to the given route and destination
-     * @param route_id Represents the route number
-     * @param dest Represents the destination (A city inside of the greater-Seattle area)
-     * @return Route URL that goes to the bus route page with more information about the route
-     */
-    public String getUrlFromDestRoute(String route_id, String dest) {
-        // capitalize the destination
-        dest = dest.substring(0, 1).toUpperCase() + dest.substring(1);
-        return completeDestRouteUrlMap.get(dest).get(route_id);
     }
 
     /**

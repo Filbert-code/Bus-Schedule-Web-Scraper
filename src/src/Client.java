@@ -1,3 +1,6 @@
+/*
+    Author: Alex Filbert
+ */
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -10,9 +13,9 @@ public class Client {
         boolean running = true;
         while(running) {
             System.out.print("Please enter a letter that your destination starts with: ");
-            char dest = scanner.next().toLowerCase().charAt(0);
+            char dest = scanner.next().charAt(0);
             System.out.println();
-            printBusRoutesUrls(rf, dest);
+            Map<String,Map<String, String>> map = printBusRoutesUrls(rf, dest);
 
             System.out.print("Please enter your destination: ");
             String dest_complete = scanner.next();
@@ -22,7 +25,7 @@ public class Client {
 
             String route_url = "";
             try {
-                route_url = rf.getUrlFromDestRoute(route_id, dest_complete);
+                route_url = map.get(dest_complete).get(route_id);
             } catch(Exception e) {
                 System.out.println("Could not find a bus schedule with the given destination and route combination.\n");
                 continue;
@@ -41,8 +44,9 @@ public class Client {
 
     }
 
-    public static void printBusRoutesUrls(RouteFinder rf, char dest) {
-        Map<String, Map<String, String>> map = rf.getBusRoutesUrls(dest);
+    // prints out all the routes beginning with the given argument char value
+    public static Map<String,Map<String, String>> printBusRoutesUrls(RouteFinder rf, char dest) {
+        Map<String,Map<String, String>>  map = rf.getBusRoutesUrls(dest);
         for(String destination: map.keySet()) {
             System.out.println("Destination: " + destination);
             for(String route: map.get(destination).keySet()) {
@@ -50,8 +54,10 @@ public class Client {
             }
             System.out.println("+++++++++++++++++++++++++++++++++++");
         }
+        return map;
     }
 
+    // prints the destinations and bus stops associated with the given url
     public static void printRouteStops(RouteFinder rf, String url) throws Exception{
         Map<String, LinkedHashMap<String, String>> dest_trip_route = rf.getRouteStops(url);
         for (String dest: dest_trip_route.keySet()) {
