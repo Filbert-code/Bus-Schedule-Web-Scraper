@@ -3,6 +3,8 @@
  */
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
@@ -35,17 +37,23 @@ public class RouteFinder implements IRouteFinder{
      * @return String HTML of the webpage from the given URL
      * @throws Exception
      */
-    private String getUrlText(String URL) throws Exception{
+    private String getUrlText(String URL){
         text = "";
-        URLConnection bus_sch_website = new URL(URL).openConnection();
-        bus_sch_website.setRequestProperty("user-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
-        BufferedReader in = new BufferedReader(new InputStreamReader(bus_sch_website.getInputStream()));
-        String inputLine = "";
-        String text = "";
-        while ((inputLine = in.readLine()) != null) {
-            this.text += inputLine;
+        try {
+            URLConnection bus_sch_website = new URL(URL).openConnection();
+            bus_sch_website.setRequestProperty("user-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+            BufferedReader in = new BufferedReader(new InputStreamReader(bus_sch_website.getInputStream()));
+            String inputLine = "";
+            String text = "";
+            // append lines of input HTML to the text member variable
+            while ((inputLine = in.readLine()) != null) {
+                this.text += inputLine;
+            }
+            in.close();
+        } catch (IOException e) {
+            System.out.println("There was a problem reading the input HTML from the bus schedule website.");
         }
-        in.close();
+
         return this.text;
     }
 
@@ -56,8 +64,9 @@ public class RouteFinder implements IRouteFinder{
      *       value is an inner map with a pair of route ID and the route page URL
      *       (e.g. of a map element <Brier, <111, https://www.communitytransit.org/busservice/schedules/route/111>>)
      */
-    public Map<String, Map<String, String>> getBusRoutesUrls(final char destInitial) throws RuntimeException{
+    public Map<String, Map<String, String>> getBusRoutesUrls(final char destInitial) {
 
+        //
         if(!Character.isLetter(destInitial)) {
             System.out.println("A letter was not entered.");
             throw new RuntimeException();
@@ -98,33 +107,36 @@ public class RouteFinder implements IRouteFinder{
      *  and value is the list of stops in the same order that it was parsed on
      * (e.g. of a map element <To Mountlake Terrace, <<1, Brier Rd &amp; 228th Pl SW>, <2, 228th St SW &amp; 48th Ave W>, ...>>)
      */
-    public Map<String, LinkedHashMap<String, String>> getRouteStops(final String url) throws Exception{
-
+    public Map<String, LinkedHashMap<String, String>> getRouteStops(final String url){
+        // get HTML from the given URL
         this.getUrlText(url);
-
+        // regular expression for the two route destinations on each page
         Pattern label_pattern = Pattern.compile("name=\"Trip\".*?>(.*?)</label>");
         Matcher label_matcher = label_pattern.matcher(this.text);
 
+        // append the two route destinations to an array
         ArrayList<String> dest_arr = new ArrayList<>();
         while(label_matcher.find()) {
             String dest = label_matcher.group(1);
-            dest = rid_Of_Amp(dest);
+            dest = rid_Of_Amp(dest); // call helper method to delete unnecessary characters
             dest_arr.add(dest);
         }
-
+        // regular expression grabbing all the HTML that contains the bus stop information
         Pattern wd_pattern = Pattern.compile("<div id=\"Weekday(.*?)id=\"Weekday(.*?)</table>");
         Matcher wd_matcher = wd_pattern.matcher(this.text);
+        // each String stores all the HTML that contains the bus stop information for each of the two destinations
         String weekday_route_1 = "";
         String weekday_route_2 = "";
         while(wd_matcher.find()){
             weekday_route_1 = wd_matcher.group(1);
             weekday_route_2 = wd_matcher.group(2);
         }
-
+        // regular expression for matching the bus stops
         Pattern route_pattern = Pattern.compile("<th.*?<p>(.*?)</p>");
         Matcher route_1_matcher = route_pattern.matcher(weekday_route_1);
         Matcher route_2_matcher = route_pattern.matcher(weekday_route_2);
 
+        // appending all of the first route bus stops to an array
         List<String> route_1_stops = new ArrayList<>();
         while(route_1_matcher.find()) {
             String bus_stop = route_1_matcher.group(1);
@@ -134,6 +146,7 @@ public class RouteFinder implements IRouteFinder{
             route_1_stops.add(bus_stop);
         }
 
+        // appending all of the second route bus stops to an array
         List<String> route_2_stops = new ArrayList<>();
         while(route_2_matcher.find()) {
             String bus_stop = route_2_matcher.group(1);
@@ -144,6 +157,7 @@ public class RouteFinder implements IRouteFinder{
         }
 
         Map<String, LinkedHashMap<String, String>> dest_trip_route;
+        // calling a helper method to combine the route arrays and destination array into a Map
         dest_trip_route = fill_dest_trip_route(route_1_stops, route_2_stops, dest_arr);
         return dest_trip_route;
     }
