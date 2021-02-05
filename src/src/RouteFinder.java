@@ -66,12 +66,13 @@ public class RouteFinder implements IRouteFinder{
      */
     public Map<String, Map<String, String>> getBusRoutesUrls(final char destInitial) {
 
-        //
+        // throws an exception if the user did not enter a letter
         if(!Character.isLetter(destInitial)) {
             System.out.println("A letter was not entered.");
             throw new RuntimeException();
         }
 
+        // regular expression for matching the destinations and routes
         Pattern pattern = Pattern.compile("(<h3>(.*?)</h3>.*?)?<strong><a\shref=\"(.*?)\".*?>(.*?)</a>");
         Matcher matcher = pattern.matcher(this.text);
 
@@ -81,6 +82,7 @@ public class RouteFinder implements IRouteFinder{
         String route;
         String url;
         String dest = "";
+        // loop through the matched Strings and append them to the appropriate key/value in UserDestRouteUrlMap
         while(matcher.find()) {
             if(matcher.group(1) != null) {
                 dest = matcher.group(2);
@@ -90,9 +92,11 @@ public class RouteFinder implements IRouteFinder{
                 }
                 // creating a new routeUrlMap that will not be saved to destRouteUrlMap
                 routeUrlMap2 = new HashMap<>();
+                // append to the member variable Map to be access later by the getRouteStops function
                 completeDestRouteUrlMap.put(dest, routeUrlMap2);
             }
             route = matcher.group(4);
+            // prepend the rest of the URL
             url = "https://www.communitytransit.org/busservice" + matcher.group(3);
             routeUrlMap.put(route, url);
             routeUrlMap2.put(route, url);
