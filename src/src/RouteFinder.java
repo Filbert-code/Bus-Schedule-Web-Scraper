@@ -52,6 +52,7 @@ public class RouteFinder implements IRouteFinder{
             in.close();
         } catch (IOException e) {
             System.out.println("There was a problem reading the input HTML from the bus schedule website.");
+            throw new RuntimeException();
         }
 
         return this.text;
@@ -113,7 +114,13 @@ public class RouteFinder implements IRouteFinder{
      */
     public Map<String, LinkedHashMap<String, String>> getRouteStops(final String url){
         // get HTML from the given URL
-        this.getUrlText(url);
+        try {
+            this.getUrlText(url);
+        } catch (Exception e) {
+            System.out.println("Route ID was not found.");
+            throw new RuntimeException();
+        }
+
         // regular expression for the two route destinations on each page
         Pattern label_pattern = Pattern.compile("name=\"Trip\".*?>(.*?)</label>");
         Matcher label_matcher = label_pattern.matcher(this.text);
