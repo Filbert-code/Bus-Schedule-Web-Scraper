@@ -7,7 +7,6 @@ import java.util.Scanner;
 
 public class Client {
     public static void main(String[] args) throws Exception{
-        String URL = "https://www.communitytransit.org/busservice/schedules/";
         RouteFinder rf = new RouteFinder();
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
