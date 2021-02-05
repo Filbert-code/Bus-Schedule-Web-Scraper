@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 public class RouteFinder implements IRouteFinder{
 
     // stores the destination, and corresponding Map of routes with route URLs. <destination, Map<route, url>>
-    private final Map<String, Map<String, String>> completeDestRouteUrlMap;
+    public final Map<String, Map<String, String>> completeDestRouteUrlMap;
     // the html of the webpage being parsed (returned by getUrlText)
     private String text;
 
@@ -165,6 +165,12 @@ public class RouteFinder implements IRouteFinder{
                 bus_stop = rid_Of_Amp(bus_stop);
             }
             route_2_stops.add(bus_stop);
+        }
+
+        if(route_1_stops.isEmpty() && route_2_stops.isEmpty()) {
+            System.out.println("Your chosen route does not have any bus stops currently so none can be displayed.");
+            System.out.println(url);
+//            throw new RuntimeException();
         }
 
         Map<String, LinkedHashMap<String, String>> dest_trip_route;
