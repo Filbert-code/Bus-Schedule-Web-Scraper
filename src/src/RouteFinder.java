@@ -167,12 +167,6 @@ public class RouteFinder implements IRouteFinder{
             route_2_stops.add(bus_stop);
         }
 
-        if(route_1_stops.isEmpty() && route_2_stops.isEmpty()) {
-            System.out.println("Your chosen route does not have any bus stops currently so none can be displayed.");
-            System.out.println(url);
-//            throw new RuntimeException();
-        }
-
         Map<String, LinkedHashMap<String, String>> dest_trip_route;
         // calling a helper method to combine the route arrays and destination array into a Map
         dest_trip_route = fill_dest_trip_route(route_1_stops, route_2_stops, dest_arr);
@@ -199,7 +193,14 @@ public class RouteFinder implements IRouteFinder{
         for(int bus_stop_ind = 0; bus_stop_ind < route_1_stops.size(); bus_stop_ind++) {
             trip_route.put(String.valueOf(bus_stop_ind + 1), route_1_stops.get(bus_stop_ind));
         }
-        dest_trip_route.put(dest_arr.get(0), trip_route);
+        // error handling for if the route stops are empty
+        try{
+            dest_trip_route.put(dest_arr.get(0), trip_route);
+        } catch (Exception e){
+            System.out.println("Your chosen route does not have any bus stops currently so none can be displayed.");
+            throw new RuntimeException();
+        }
+
         trip_route = new LinkedHashMap<String, String>();
         for(int bus_stop_ind = 0; bus_stop_ind < route_2_stops.size(); bus_stop_ind++) {
             trip_route.put(String.valueOf(route_2_stops.size() - bus_stop_ind), route_2_stops.get(bus_stop_ind));
